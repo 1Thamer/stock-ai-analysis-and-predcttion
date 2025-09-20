@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Stock Market Analysis Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h2>AI Stock Platform</h2>
+            </div>
+            <div class="header-actions">
+                <div class="search-container">
+                    <input type="text" id="stock-search" class="form-control" placeholder="Search stocks..." autocomplete="off">
+                    <div id="search-results" class="search-results hidden"></div>
+                </div>
+                <div class="market-status">
+                    <span class="status status--success">Market Open</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <button class="nav-link active" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-section="analysis">
+                        <i class="fas fa-chart-area"></i>
+                        <span>Stock Analysis</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-section="predictions">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Predictions</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-section="portfolio">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Portfolio</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-section="screener">
+                        <i class="fas fa-filter"></i>
+                        <span>Screener</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-section="risk">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Risk Assessment</span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="section active">
+                <div class="section-header">
+                    <h1>Market Overview</h1>
+                    <p class="section-description">Real-time market data and key metrics</p>
+                </div>
+
+                <!-- Market Summary Cards -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h3>S&P 500</h3>
+                        <div class="metric-value positive" id="sp500-value">5,850.23</div>
+                        <div class="metric-change positive" id="sp500-change">+0.45%</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>NASDAQ</h3>
+                        <div class="metric-value positive" id="nasdaq-value">19,265.48</div>
+                        <div class="metric-change positive" id="nasdaq-change">+0.78%</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>DOW</h3>
+                        <div class="metric-value positive" id="dow-value">41,932.15</div>
+                        <div class="metric-change positive" id="dow-change">+0.23%</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>VIX</h3>
+                        <div class="metric-value" id="vix-value">16.32</div>
+                        <div class="metric-label">Volatility Index</div>
+                    </div>
+                </div>
+
+                <!-- Market Statistics -->
+                <div class="market-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Market Cap</span>
+                        <span class="stat-value" id="total-market-cap">$47.2T</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Active Stocks</span>
+                        <span class="stat-value" id="active-stocks">4,127</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Advancing</span>
+                        <span class="stat-value positive" id="advancing">2,841</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Declining</span>
+                        <span class="stat-value negative" id="declining">1,286</span>
+                    </div>
+                </div>
+
+                <!-- Top Stocks Table -->
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Top Stocks by Market Cap</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="table-container">
+                            <table class="stocks-table">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Company</th>
+                                        <th>Sector</th>
+                                        <th>Market Cap</th>
+                                        <th>Price</th>
+                                        <th>Change</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-stocks-table">
+                                    <!-- Populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock Analysis Section -->
+            <div id="analysis-section" class="section">
+                <div class="section-header">
+                    <h1>Stock Analysis</h1>
+                    <p class="section-description">Detailed technical analysis and charts</p>
+                </div>
+
+                <div class="analysis-controls">
+                    <select id="stock-selector" class="form-control">
+                        <option value="">Select a stock...</option>
+                    </select>
+                    <div class="timeframe-buttons">
+                        <button class="btn btn--sm timeframe-btn active" data-timeframe="1D">1D</button>
+                        <button class="btn btn--sm timeframe-btn" data-timeframe="5D">5D</button>
+                        <button class="btn btn--sm timeframe-btn" data-timeframe="1M">1M</button>
+                        <button class="btn btn--sm timeframe-btn" data-timeframe="3M">3M</button>
+                        <button class="btn btn--sm timeframe-btn" data-timeframe="1Y">1Y</button>
+                    </div>
+                </div>
+
+                <div class="analysis-grid">
+                    <div class="chart-container">
+                        <div class="chart-wrapper" style="position: relative; height: 400px;">
+                            <canvas id="price-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="stock-info-panel">
+                        <div class="card">
+                            <div class="card__header">
+                                <h3 id="selected-stock-name">Select a Stock</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="stock-details" id="stock-details">
+                                    <p>Select a stock to view detailed information</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mt-8">
+                            <div class="card__header">
+                                <h3>Technical Indicators</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="indicators-list" id="technical-indicators">
+                                    <!-- Populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Predictions Section -->
+            <div id="predictions-section" class="section">
+                <div class="section-header">
+                    <h1>AI Predictions</h1>
+                    <p class="section-description">Machine learning model predictions and insights</p>
+                </div>
+
+                <div class="predictions-controls">
+                    <select id="prediction-stock-selector" class="form-control">
+                        <option value="">Select a stock for predictions...</option>
+                    </select>
+                </div>
+
+                <div class="predictions-grid">
+                    <div id="ml-models-grid" class="ml-models-grid">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="prediction-chart-container mt-8">
+                    <div class="card">
+                        <div class="card__header">
+                            <h3>Prediction Comparison</h3>
+                        </div>
+                        <div class="card__body">
+                            <div class="chart-wrapper" style="position: relative; height: 300px;">
+                                <canvas id="predictions-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portfolio Section -->
+            <div id="portfolio-section" class="section">
+                <div class="section-header">
+                    <h1>Portfolio Tracker</h1>
+                    <p class="section-description">Manage and track your stock portfolio</p>
+                </div>
+
+                <div class="portfolio-controls">
+                    <div class="add-stock-form">
+                        <select id="portfolio-stock-selector" class="form-control">
+                            <option value="">Add stock to portfolio...</option>
+                        </select>
+                        <input type="number" id="stock-quantity" class="form-control" placeholder="Quantity" min="1">
+                        <button id="add-to-portfolio" class="btn btn--primary">Add Stock</button>
+                    </div>
+                </div>
+
+                <div class="portfolio-grid">
+                    <div class="portfolio-summary">
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Portfolio Performance</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="portfolio-metrics" id="portfolio-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Total Value</span>
+                                        <span class="metric-value" id="portfolio-total">$0.00</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Total Gain/Loss</span>
+                                        <span class="metric-value" id="portfolio-gain-loss">$0.00</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Percentage Change</span>
+                                        <span class="metric-value" id="portfolio-percentage">0.00%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mt-8">
+                            <div class="card__header">
+                                <h3>Asset Allocation</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="chart-wrapper" style="position: relative; height: 250px;">
+                                    <canvas id="allocation-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-holdings">
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Holdings</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="table-container">
+                                    <table class="stocks-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Symbol</th>
+                                                <th>Quantity</th>
+                                                <th>Price</th>
+                                                <th>Value</th>
+                                                <th>Gain/Loss</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="portfolio-holdings-table">
+                                            <tr>
+                                                <td colspan="6" class="empty-state">No holdings in portfolio</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screener Section -->
+            <div id="screener-section" class="section">
+                <div class="section-header">
+                    <h1>Stock Screener</h1>
+                    <p class="section-description">Filter stocks based on various criteria</p>
+                </div>
+
+                <div class="screener-filters">
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label class="form-label">Sector</label>
+                            <select id="sector-filter" class="form-control">
+                                <option value="">All Sectors</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Financial">Financial</option>
+                                <option value="Consumer Discretionary">Consumer Discretionary</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label">Market Cap</label>
+                            <select id="market-cap-filter" class="form-control">
+                                <option value="">All Sizes</option>
+                                <option value="large">Large Cap (>$10B)</option>
+                                <option value="mid">Mid Cap ($2B-$10B)</option>
+                                <option value="small">Small Cap (<$2B)</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label">AI Prediction</label>
+                            <select id="prediction-filter" class="form-control">
+                                <option value="">All Predictions</option>
+                                <option value="bullish">Bullish</option>
+                                <option value="neutral">Neutral</option>
+                                <option value="bearish">Bearish</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button id="apply-filters" class="btn btn--primary">Apply Filters</button>
+                            <button id="clear-filters" class="btn btn--secondary">Clear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="screener-results">
+                    <div class="card">
+                        <div class="card__header">
+                            <h3>Filtered Results</h3>
+                            <span id="results-count" class="results-count">0 stocks found</span>
+                        </div>
+                        <div class="card__body">
+                            <div class="table-container">
+                                <table class="stocks-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Symbol</th>
+                                            <th>Company</th>
+                                            <th>Sector</th>
+                                            <th>Market Cap</th>
+                                            <th>AI Prediction</th>
+                                            <th>Confidence</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="screener-results-table">
+                                        <!-- Populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Assessment Section -->
+            <div id="risk-section" class="section">
+                <div class="section-header">
+                    <h1>Risk Assessment</h1>
+                    <p class="section-description">Analyze portfolio risk and get insights</p>
+                </div>
+
+                <div class="risk-grid">
+                    <div class="risk-metrics">
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Risk Metrics</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="risk-metrics-list" id="risk-metrics-list">
+                                    <div class="risk-metric-item">
+                                        <span class="risk-label">Portfolio Beta</span>
+                                        <span class="risk-value" id="portfolio-beta">1.24</span>
+                                    </div>
+                                    <div class="risk-metric-item">
+                                        <span class="risk-label">Value at Risk (95%)</span>
+                                        <span class="risk-value negative" id="var-95">-$2,340</span>
+                                    </div>
+                                    <div class="risk-metric-item">
+                                        <span class="risk-label">Volatility</span>
+                                        <span class="risk-value" id="volatility">18.5%</span>
+                                    </div>
+                                    <div class="risk-metric-item">
+                                        <span class="risk-label">Sharpe Ratio</span>
+                                        <span class="risk-value" id="sharpe-ratio">1.34</span>
+                                    </div>
+                                    <div class="risk-metric-item">
+                                        <span class="risk-label">Max Drawdown</span>
+                                        <span class="risk-value negative" id="max-drawdown">-12.8%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="risk-charts">
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Risk Distribution</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="chart-wrapper" style="position: relative; height: 250px;">
+                                    <canvas id="risk-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="correlation-matrix mt-8">
+                    <div class="card">
+                        <div class="card__header">
+                            <h3>Stock Correlation Matrix</h3>
+                        </div>
+                        <div class="card__body">
+                            <div class="correlation-grid" id="correlation-matrix">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
